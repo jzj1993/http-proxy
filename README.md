@@ -1,42 +1,44 @@
 # HTTP Proxy
 
-`HTTP Proxy` 是一个带 HMAC 鉴权的 HTTP 代理服务。调用方把目标请求交给本地 `POST /proxy`，服务完成出网请求后把上游响应返回。
+`HTTP Proxy` is an HMAC-protected HTTP proxy service. Callers send a signed `POST /proxy` request to the local service, and the service performs the outbound HTTP/HTTPS request and returns the upstream response.
 
-## 能力
+[中文 README](README.zh-CN.md)
 
-| 路径 | 说明 |
+## What It Does
+
+| Path | Purpose |
 | --- | --- |
-| `src/` | 代理服务端，提供 `POST /proxy` 接口。 |
-| `client/` | 调用代理服务的 TypeScript client，负责签名和请求封装。 |
-| `e2e/` | 本地端到端验证脚本，目前包含代理冒烟测试。 |
+| `src/` | Proxy server that exposes `POST /proxy`. |
+| `client/` | TypeScript client that signs requests and wraps proxy calls. |
+| `e2e/` | Local end-to-end smoke test for the proxy flow. |
 
-目前支持普通 HTTP/HTTPS 目标、常见 HTTP 方法、文本请求体和 base64 二进制请求体；不支持代理本机、私有网段、link-local、multicast 等明显不安全目标。
+The proxy supports HTTP/HTTPS targets, common HTTP methods, text request bodies, and base64-encoded binary request bodies. It blocks clearly unsafe targets such as localhost, private IPv4 ranges, link-local addresses, multicast addresses, IPv6 loopback, IPv6 unique-local, and IPv6 link-local addresses.
 
-## 使用场景
+## Use Cases
 
-- 内部服务统一出网，集中处理鉴权、超时和响应大小限制。
-- 受限运行环境通过固定代理访问外部 HTTP/HTTPS API。
-- 为脚本、任务队列或 AI agent 提供带签名保护的请求代发入口。
-- 把第三方 API 调用收口到单一服务，便于后续增加日志、限流和审计。
+- Centralize outbound HTTP/HTTPS access for internal services.
+- Give restricted runtimes a fixed, signed gateway for external APIs.
+- Provide scripts, job queues, or AI agents with a protected request relay.
+- Route third-party API traffic through one service so logging, rate limiting, and auditing can be added later.
 
-## 快速开始
+## Quick Start
 
 ```bash
 npm install
 cp .env.example .env
 ```
 
-编辑 `.env`，把 `PROXY_SECRET` 改成足够长的随机字符串，然后启动服务：
+Edit `.env` and replace `PROXY_SECRET` with a long random secret, then start the service:
 
 ```bash
 npm run dev
 ```
 
-默认监听 `0.0.0.0:3000`。
+By default, the server listens on `0.0.0.0:3000`.
 
-## 使用 Client
+## Client Usage
 
-推荐通过 `client/` 里的 `HttpProxyClient` 调用代理服务，调用方不需要自己拼 HMAC header。
+The recommended path is to use `HttpProxyClient` from `client/`. Callers do not need to build HMAC headers manually.
 
 ```ts
 import { HttpProxyClient } from "./client/index.js";
@@ -57,38 +59,28 @@ const result = await client.request({
 console.log(result.status, result.body);
 ```
 
-核心类型：
+Core types:
 
 ```ts
 type ProxyRequest = {
-  url: string; // 目标 HTTP/HTTPS URL
-  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS"; // 转发方法
-  headers?: Record<string, string>; // 需要转发给上游的请求头
-  body?: string | null; // 文本请求体；GET/HEAD 会忽略 body
-  bodyEncoding?: "base64"; // 二进制请求体用 base64
+  url: string;
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS";
+  headers?: Record<string, string>;
+  body?: string | null;
+  bodyEncoding?: "utf8" | "base64";
 };
 
 type ProxyResult = {
-  status: number; // 上游 HTTP 状态码
-  headers: Record<string, string>; // 上游响应头
-  body: string; // 上游响应体；根据 bodyEncoding 解释
-  bodyEncoding: "utf8" | "base64"; // 响应体编码
+  status: number;
+  headers: Record<string, string>;
+  body: string;
+  bodyEncoding: "utf8" | "base64";
 };
 ```
 
-## 端到端验证
+## Configuration
 
-先启动本地服务，再运行：
-
-```bash
-npm run test:e2e
-```
-
-脚本会读取 `.env` 里的 `PORT` 和 `PROXY_SECRET`，调用本地代理请求 `https://httpbin.org/json`，并把返回的 JSON body 解析后打印出来。
-
-## 配置
-
-`.env` 只放代理服务本身的运行配置：
+`.env` contains the runtime configuration for the proxy service:
 
 ```bash
 PROXY_SECRET=replace-with-a-long-random-secret
@@ -99,18 +91,18 @@ MAX_RESPONSE_BYTES=5242880
 TIMESTAMP_TOLERANCE_MS=300000
 ```
 
-| 变量 | 说明 |
+| Variable | Description |
 | --- | --- |
-| `PROXY_SECRET` | 必填，HMAC 签名密钥。 |
-| `PORT` | 服务监听端口，默认 `3000`。 |
-| `HOST` | 服务监听地址，默认 `0.0.0.0`。 |
-| `REQUEST_TIMEOUT_MS` | 上游请求超时时间，默认 `15000`。 |
-| `MAX_RESPONSE_BYTES` | 最大上游响应体大小，默认 `5242880`。 |
-| `TIMESTAMP_TOLERANCE_MS` | 请求时间戳允许偏移，默认 `300000`。 |
+| `PROXY_SECRET` | Required HMAC signing secret. |
+| `PORT` | Listen port. Defaults to `3000`. |
+| `HOST` | Listen host. Defaults to `0.0.0.0`. |
+| `REQUEST_TIMEOUT_MS` | Upstream request timeout. Defaults to `15000`. |
+| `MAX_RESPONSE_BYTES` | Maximum upstream response body size. Defaults to `5242880`. |
+| `TIMESTAMP_TOLERANCE_MS` | Allowed timestamp skew for signed requests. Defaults to `300000`. |
 
-## 直接调用接口
+## Direct API Calls
 
-如果不使用 `client/`，需要自己调用 `POST /proxy` 并生成签名：
+If you do not use `client/`, call `POST /proxy` directly and generate the signature yourself:
 
 ```http
 POST /proxy
@@ -119,7 +111,7 @@ X-Proxy-Timestamp: <unix milliseconds>
 X-Proxy-Signature: <hmac-sha256 hex>
 ```
 
-签名内容是 `<timestamp>.<raw JSON request body>`。
+The signed payload is `<timestamp>.<raw JSON request body>`.
 
 ```js
 import { createHmac } from "node:crypto";
@@ -135,15 +127,15 @@ const signature = createHmac("sha256", process.env.PROXY_SECRET)
   .digest("hex");
 ```
 
-## 安全边界
+## Security Boundary
 
-服务会拒绝未签名请求、签名错误请求，以及超出时间窗口的请求。代理目标只允许 `http:` 和 `https:` URL。
+The service rejects unsigned requests, requests with invalid signatures, and requests outside the allowed timestamp window. Target URLs must use `http:` or `https:`.
 
-默认会阻止明显的本地和私有网络目标，包括 `localhost`、loopback、私有 IPv4 地址段、link-local、multicast、IPv6 loopback、IPv6 unique-local 和 IPv6 link-local。服务也会在转发前移除 hop-by-hop 与 authority 类请求头。
+Before forwarding, the proxy removes hop-by-hop and authority-related request headers. It also blocks literal unsafe hosts such as localhost, private network addresses, link-local addresses, multicast addresses, IPv6 loopback, IPv6 unique-local, and IPv6 link-local addresses.
 
-当前实现阻止的是字面量不安全地址和 localhost 类主机名；如果放到多租户或敌意环境里，需要增加 DNS 解析检查来降低 DNS rebinding 风险。
+The current implementation checks literal unsafe addresses and localhost-style hostnames. For multi-tenant or hostile environments, add DNS resolution checks to reduce DNS rebinding risk.
 
-## 开发命令
+## Development
 
 ```bash
 npm run dev
@@ -152,9 +144,17 @@ npm test
 npm run test:e2e
 ```
 
-生产运行：
+Run the production build:
 
 ```bash
 npm run build
 npm start
 ```
+
+For the end-to-end smoke test, start the local service first, then run:
+
+```bash
+npm run test:e2e
+```
+
+The script reads `PORT` and `PROXY_SECRET` from `.env`, calls the local proxy for `https://httpbin.org/json`, and prints the parsed JSON body.
