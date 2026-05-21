@@ -37,6 +37,13 @@ npm start
 
 默认监听 `0.0.0.0:3000`。
 
+如果交给 PM2 托管生产进程：
+
+```bash
+npm run build
+pm2 start ecosystem.config.cjs --env production
+```
+
 ## 使用 Client
 
 推荐通过 `client/` 里的 `HttpProxyClient` 调用代理服务，调用方不需要自己拼 HMAC header。
@@ -150,6 +157,13 @@ npm run test:e2e
 ```bash
 npm run build
 npm start
+```
+
+或者直接用 PM2：
+
+```bash
+npm run build
+pm2 start ecosystem.config.cjs --env production
 ```
 
 端到端冒烟测试需要先启动本地服务，再运行：

@@ -37,6 +37,13 @@ npm start
 
 By default, the server listens on `0.0.0.0:3000`.
 
+For PM2-managed production runs:
+
+```bash
+npm run build
+pm2 start ecosystem.config.cjs --env production
+```
+
 ## Client Usage
 
 The recommended path is to use `HttpProxyClient` from `client/`. Callers do not need to build HMAC headers manually.
@@ -150,6 +157,13 @@ Run the production build:
 ```bash
 npm run build
 npm start
+```
+
+Or with PM2:
+
+```bash
+npm run build
+pm2 start ecosystem.config.cjs --env production
 ```
 
 For the end-to-end smoke test, start the local service first, then run:
