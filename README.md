@@ -35,7 +35,7 @@ npm run build
 npm start
 ```
 
-By default, the server listens on `0.0.0.0:3000`.
+By default, the server listens on `0.0.0.0:9090`.
 
 For PM2-managed production runs:
 
@@ -52,7 +52,7 @@ The recommended path is to use `HttpProxyClient` from `client/`. Callers do not 
 import { HttpProxyClient } from "./client/index.js";
 
 const client = new HttpProxyClient({
-  proxyUrl: "http://127.0.0.1:3000/proxy",
+  proxyUrl: "http://127.0.0.1:9090/proxy",
   proxySecret: process.env.PROXY_SECRET!,
 });
 
@@ -92,7 +92,7 @@ type ProxyResult = {
 
 ```bash
 PROXY_SECRET=replace-with-a-long-random-secret
-PORT=3000
+PORT=9090
 HOST=0.0.0.0
 REQUEST_TIMEOUT_MS=15000
 MAX_RESPONSE_BYTES=5242880
@@ -102,7 +102,7 @@ TIMESTAMP_TOLERANCE_MS=300000
 | Variable | Description |
 | --- | --- |
 | `PROXY_SECRET` | Required HMAC signing secret. |
-| `PORT` | Listen port. Defaults to `3000`. |
+| `PORT` | Listen port. Defaults to `9090`. |
 | `HOST` | Listen host. Defaults to `0.0.0.0`. |
 | `REQUEST_TIMEOUT_MS` | Upstream request timeout. Defaults to `15000`. |
 | `MAX_RESPONSE_BYTES` | Maximum upstream response body size. Defaults to `5242880`. |

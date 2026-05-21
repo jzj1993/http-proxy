@@ -6,7 +6,7 @@ import "dotenv/config";
 import { HttpProxyClient } from "../client/index.js";
 
 const proxyHost = "127.0.0.1";
-const proxyPort = process.env.PORT ?? "3000";
+const proxyPort = process.env.PORT ?? "9090";
 const proxyUrl = `http://${proxyHost}:${proxyPort}/proxy`;
 const targetUrl = "https://httpbin.org/json";
 const secret = process.env.PROXY_SECRET;

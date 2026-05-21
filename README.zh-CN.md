@@ -35,7 +35,7 @@ npm run build
 npm start
 ```
 
-默认监听 `0.0.0.0:3000`。
+默认监听 `0.0.0.0:9090`。
 
 如果交给 PM2 托管生产进程：
 
@@ -52,7 +52,7 @@ pm2 start ecosystem.config.cjs --env production
 import { HttpProxyClient } from "./client/index.js";
 
 const client = new HttpProxyClient({
-  proxyUrl: "http://127.0.0.1:3000/proxy",
+  proxyUrl: "http://127.0.0.1:9090/proxy",
   proxySecret: process.env.PROXY_SECRET!,
 });
 
@@ -92,7 +92,7 @@ type ProxyResult = {
 
 ```bash
 PROXY_SECRET=replace-with-a-long-random-secret
-PORT=3000
+PORT=9090
 HOST=0.0.0.0
 REQUEST_TIMEOUT_MS=15000
 MAX_RESPONSE_BYTES=5242880
@@ -102,7 +102,7 @@ TIMESTAMP_TOLERANCE_MS=300000
 | 变量 | 说明 |
 | --- | --- |
 | `PROXY_SECRET` | 必填，HMAC 签名密钥。 |
-| `PORT` | 服务监听端口，默认 `3000`。 |
+| `PORT` | 服务监听端口，默认 `9090`。 |
 | `HOST` | 服务监听地址，默认 `0.0.0.0`。 |
 | `REQUEST_TIMEOUT_MS` | 上游请求超时时间，默认 `15000`。 |
 | `MAX_RESPONSE_BYTES` | 最大上游响应体大小，默认 `5242880`。 |
