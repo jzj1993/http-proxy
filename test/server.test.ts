@@ -2,7 +2,7 @@ import http, { type IncomingMessage, type ServerResponse } from "node:http";
 import { once } from "node:events";
 import { afterEach, describe, expect, it } from "vitest";
 import { createSignature } from "../src/auth.js";
-import { createApp } from "../src/server.js";
+import { createApp, isDirectExecution } from "../src/server.js";
 import type { AppConfig } from "../src/config.js";
 
 const secret = "server-test-secret";
@@ -169,5 +169,23 @@ describe("createApp", () => {
     expect(response.statusCode).toBe(502);
     expect(response.json()).toEqual({ error: { message: "Upstream request timed out" } });
     await app.close();
+  });
+});
+
+describe("isDirectExecution", () => {
+  it("detects direct node execution", () => {
+    const entrypoint = "/srv/http-proxy/dist/src/server.js";
+    const moduleUrl = new URL(`file://${entrypoint}`).href;
+
+    expect(isDirectExecution(moduleUrl, ["node", entrypoint], {})).toBe(true);
+  });
+
+  it("detects PM2 fork-mode execution", () => {
+    const entrypoint = "/srv/http-proxy/dist/src/server.js";
+    const moduleUrl = new URL(`file://${entrypoint}`).href;
+
+    expect(isDirectExecution(moduleUrl, ["node", "/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js"], {
+      pm_exec_path: entrypoint,
+    })).toBe(true);
   });
 });

@@ -3,6 +3,7 @@ import Fastify, {
   type FastifyReply,
   type FastifyRequest,
 } from "fastify";
+import { pathToFileURL } from "node:url";
 import { Readable } from "node:stream";
 import { loadConfig, type AppConfig } from "./config.js";
 import { verifyHmacRequest } from "./auth.js";
@@ -17,8 +18,13 @@ function errorResponse(reply: FastifyReply, statusCode: number, message: string)
   return reply.status(statusCode).send({ error: { message } });
 }
 
-function isDirectExecution(): boolean {
-  return process.argv[1] ? import.meta.url === new URL(process.argv[1], "file:").href : false;
+export function isDirectExecution(
+  moduleUrl = import.meta.url,
+  argv = process.argv,
+  env = process.env,
+): boolean {
+  const entrypoint = env.pm_exec_path ?? argv[1];
+  return entrypoint ? moduleUrl === pathToFileURL(entrypoint).href : false;
 }
 
 export function createApp(config: AppConfig): FastifyInstance {
