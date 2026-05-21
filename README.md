@@ -31,7 +31,8 @@ cp .env.example .env
 Edit `.env` and replace `PROXY_SECRET` with a long random secret, then start the service:
 
 ```bash
-npm run dev
+npm run build
+npm start
 ```
 
 By default, the server listens on `0.0.0.0:3000`.

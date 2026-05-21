@@ -31,7 +31,8 @@ cp .env.example .env
 编辑 `.env`，把 `PROXY_SECRET` 改成足够长的随机字符串，然后启动服务：
 
 ```bash
-npm run dev
+npm run build
+npm start
 ```
 
 默认监听 `0.0.0.0:3000`。
