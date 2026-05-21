@@ -39,7 +39,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
 
   return {
     proxySecret: env.PROXY_SECRET,
-    port: parsePositiveInteger(env, "PORT", 9090),
+    port: parsePositiveInteger(env, "PORT", 9191),
     host: env.HOST || "0.0.0.0",
     requestTimeoutMs: parsePositiveInteger(env, "REQUEST_TIMEOUT_MS", 15_000),
     maxResponseBytes: parsePositiveInteger(env, "MAX_RESPONSE_BYTES", 5 * 1024 * 1024),
