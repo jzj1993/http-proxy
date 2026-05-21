@@ -1,6 +1,6 @@
 # HTTP Proxy
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+[English](README.md) | 简体中文
 
 `HTTP Proxy` 是一个带 HMAC 鉴权的 HTTP 代理服务。调用方把签名后的 `POST /proxy` 请求交给本地服务，服务完成出网 HTTP/HTTPS 请求后返回上游响应。
 

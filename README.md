@@ -1,6 +1,6 @@
 # HTTP Proxy
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+English | [简体中文](README.zh-CN.md)
 
 `HTTP Proxy` is an HMAC-protected HTTP proxy service. Callers send a signed `POST /proxy` request to the local service, and the service performs the outbound HTTP/HTTPS request and returns the upstream response.
 
